@@ -3,14 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Summary App</title>
+    <title>StudyGist — clear study notes from PDFs &amp; videos</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <main class="container">
         <header>
-            <h1>Student Summary App</h1>
-            <p class="subtitle">Upload a video, a PDF, or paste a YouTube link to get a text summary.</p>
+            <div class="brand">
+                <svg class="logo" viewBox="0 0 64 64" width="44" height="44" aria-hidden="true">
+                    <defs>
+                        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+                            <stop offset="0" stop-color="#7aa2f7"/>
+                            <stop offset="1" stop-color="#9d7cf7"/>
+                        </linearGradient>
+                    </defs>
+                    <rect width="64" height="64" rx="16" fill="url(#g)"/>
+                    <rect x="16" y="22" width="24" height="4" rx="2" fill="#fff"/>
+                    <rect x="16" y="31" width="30" height="4" rx="2" fill="#fff" opacity=".9"/>
+                    <rect x="16" y="40" width="20" height="4" rx="2" fill="#fff" opacity=".75"/>
+                    <path d="M48 11 C49 16 50 17 55 18 C50 19 49 20 48 25 C47 20 46 19 41 18 C46 17 47 16 48 11Z" fill="#fff"/>
+                </svg>
+                <h1>StudyGist</h1>
+            </div>
+            <p class="subtitle">Turn your PDFs, videos, and YouTube links into clear, structured study notes.</p>
         </header>
 
         <section class="card">

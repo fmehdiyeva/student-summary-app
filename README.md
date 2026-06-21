@@ -1,6 +1,6 @@
-# Student Summary App
+# StudyGist
 
-A web app that helps students study faster. Upload a PDF or paste a YouTube
+A study tool that helps students learn faster. Upload a PDF or paste a YouTube
 link and get a clean, structured summary — overview, key concepts, formulas
 worth memorizing, and self-test questions. It can also "humanize" AI-generated
 text so it reads more naturally.
