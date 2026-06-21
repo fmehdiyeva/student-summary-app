@@ -7,12 +7,11 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.utils import secure_filename
 
-from summarizer import humanize_text, summarize_pdf, summarize_video, summarize_youtube
+from summarizer import humanize_text, summarize_pdf, summarize_youtube
 
 UPLOAD_DIR = Path(__file__).parent / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
 
-ALLOWED_VIDEO = {".mp4", ".mov", ".mkv", ".webm", ".avi", ".m4v"}
 ALLOWED_PDF = {".pdf"}
 MAX_UPLOAD_MB = 25
 
@@ -39,20 +38,6 @@ def _save_upload(file_storage, allowed_ext: set[str]) -> Path:
 @app.get("/")
 def index():
     return render_template("index.html")
-
-
-@app.post("/summarize/video")
-@limiter.limit("5 per minute")
-def handle_video():
-    if "file" not in request.files:
-        return jsonify(error="No file uploaded"), 400
-    language = request.form.get("language", "").strip() or "English"
-    try:
-        path = _save_upload(request.files["file"], ALLOWED_VIDEO)
-    except ValueError as e:
-        return jsonify(error=str(e)), 400
-    summary = summarize_video(path, language=language)
-    return jsonify(summary=summary, source=path.name)
 
 
 @app.post("/summarize/pdf")

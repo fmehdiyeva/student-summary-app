@@ -1,7 +1,7 @@
 """Summarization backends.
 
 YouTube summaries use youtube-transcript-api, PDF summaries use pypdf, and
-both route extracted text through the Anthropic SDK. Video remains a stub.
+both route extracted text through the Anthropic SDK.
 """
 from __future__ import annotations
 
@@ -49,11 +49,6 @@ Goals:
 Return only the rewritten text — no preface, no explanation, no quotes around it."""
 
 
-def summarize_video(path: Path, language: str = "English") -> str:
-    transcript = _transcribe_video(path)
-    return _summarize_text(transcript, kind="video", language=language)
-
-
 def summarize_pdf(path: Path, language: str = "English") -> str:
     try:
         text = _extract_pdf_text(path)
@@ -88,10 +83,6 @@ def summarize_youtube(url: str, language: str = "English") -> str:
         return f"Failed to fetch transcript: {e}"
 
     return _summarize_text(transcript, kind="youtube", language=language)
-
-
-def _transcribe_video(path: Path) -> str:
-    return f"[stub transcript for video {path.name}]"
 
 
 def _extract_pdf_text(path: Path) -> str:
