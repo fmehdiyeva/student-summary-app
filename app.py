@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from uuid import uuid4
 
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, Response, jsonify, render_template, request
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.utils import secure_filename
@@ -38,6 +38,23 @@ def _save_upload(file_storage, allowed_ext: set[str]) -> Path:
 @app.get("/")
 def index():
     return render_template("index.html")
+
+
+@app.get("/robots.txt")
+def robots():
+    body = f"User-agent: *\nAllow: /\nSitemap: {request.url_root}sitemap.xml\n"
+    return Response(body, mimetype="text/plain")
+
+
+@app.get("/sitemap.xml")
+def sitemap():
+    body = (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        f"  <url><loc>{request.url_root}</loc></url>\n"
+        "</urlset>\n"
+    )
+    return Response(body, mimetype="application/xml")
 
 
 @app.post("/summarize/pdf")

@@ -1,4 +1,4 @@
-# StudyGist
+# StudySum
 
 A study tool that helps students learn faster. Upload a PDF or paste a YouTube
 link and get a clean, structured summary — overview, key concepts, formulas
