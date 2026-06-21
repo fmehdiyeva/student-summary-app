@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Summary App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <main class="container">
+        <header>
+            <h1>Student Summary App</h1>
+            <p class="subtitle">Upload a video, a PDF, or paste a YouTube link to get a text summary.</p>
+        </header>
+
+        <section class="card">
+            <label for="language">Summary language</label>
+            <select id="language">
+                <option value="English">English</option>
+                <option value="Turkish">Turkish</option>
+                <option value="Azerbaijani">Azerbaijani</option>
+                <option value="Russian">Russian</option>
+                <option value="Spanish">Spanish</option>
+                <option value="French">French</option>
+                <option value="German">German</option>
+                <option value="Italian">Italian</option>
+                <option value="Portuguese">Portuguese</option>
+                <option value="Chinese">Chinese</option>
+                <option value="Japanese">Japanese</option>
+                <option value="Arabic">Arabic</option>
+            </select>
+        </section>
+
+        <section class="card">
+            <h2>1. Upload a video</h2>
+            <form id="video-form" class="upload-form">
+                <input type="file" name="file" accept="video/*" required>
+                <button type="submit">Summarize video</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>2. Upload PDF notes</h2>
+            <form id="pdf-form" class="upload-form">
+                <input type="file" name="file" accept="application/pdf" required>
+                <button type="submit">Summarize PDF</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>3. Paste a YouTube link</h2>
+            <form id="youtube-form" class="upload-form">
+                <input type="url" name="url" placeholder="https://www.youtube.com/watch?v=..." required>
+                <button type="submit">Summarize video link</button>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2>4. Humanize AI text</h2>
+            <form id="humanize-form" class="upload-form">
+                <textarea name="text" rows="5" placeholder="Paste AI-generated text here..." required></textarea>
+                <button type="submit">Humanize</button>
+            </form>
+        </section>
+
+        <section class="card output-card">
+            <h2>Output</h2>
+            <div id="status" class="status"></div>
+            <pre id="output" class="output">Your result will appear here.</pre>
+        </section>
+    </main>
+
+    <script>
+        const languageInput = document.getElementById("language");
+        const output = document.getElementById("output");
+        const status = document.getElementById("status");
+
+        function setStatus(msg, isError = false) {
+            status.textContent = msg;
+            status.className = "status" + (isError ? " error" : "");
+        }
+
+        async function postForm(url, formData) {
+            setStatus("Working...");
+            output.textContent = "";
+            try {
+                const res = await fetch(url, { method: "POST", body: formData });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Request failed");
+                setStatus(`Done · source: ${data.source}`);
+                output.textContent = data.summary;
+            } catch (e) {
+                setStatus(e.message, true);
+            }
+        }
+
+        document.getElementById("video-form").addEventListener("submit", (e) => {
+            e.preventDefault();
+            const fd = new FormData(e.target);
+            fd.append("language", languageInput.value);
+            postForm("/summarize/video", fd);
+        });
+
+        document.getElementById("pdf-form").addEventListener("submit", (e) => {
+            e.preventDefault();
+            const fd = new FormData(e.target);
+            fd.append("language", languageInput.value);
+            postForm("/summarize/pdf", fd);
+        });
+
+        document.getElementById("youtube-form").addEventListener("submit", (e) => {
+            e.preventDefault();
+            const fd = new FormData(e.target);
+            fd.append("language", languageInput.value);
+            postForm("/summarize/youtube", fd);
+        });
+
+        document.getElementById("humanize-form").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const text = e.target.elements["text"].value;
+            setStatus("Working...");
+            output.textContent = "";
+            try {
+                const res = await fetch("/humanize", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Request failed");
+                setStatus("Done");
+                output.textContent = data.result;
+            } catch (err) {
+                setStatus(err.message, true);
+            }
+        });
+    </script>
+</body>
+</html>
