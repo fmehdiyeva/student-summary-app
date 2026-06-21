@@ -5,7 +5,10 @@ link and get a clean, structured summary — overview, key concepts, formulas
 worth memorizing, and self-test questions. It can also "humanize" AI-generated
 text so it reads more naturally.
 
-**Live demo:** _(add your Render URL here once deployed)_
+**Live demo:** https://student-summary-app.onrender.com
+
+> Hosted on Render's free tier — the first load after a period of inactivity
+> may take ~30s while the server wakes up.
 
 ## Features
 
