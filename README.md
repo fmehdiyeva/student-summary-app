@@ -13,7 +13,7 @@ text so it reads more naturally.
 ## Features
 
 - **PDF summaries** — extracts text with `pypdf` and summarizes it.
-- **Practice quiz generator** — turns notes into practice questions with answers.
+- **Explain a concept simply** — plain-English explanation with an analogy.
 - **Summaries in any language** — pick the output language per request.
 - **Text humanizer** — rewrites stiff AI text into natural prose.
 - **Rate limiting** — `flask-limiter` caps requests to protect the API quota.

@@ -8,9 +8,8 @@ from flask_limiter.util import get_remote_address
 from werkzeug.utils import secure_filename
 
 from summarizer import (
-    generate_quiz,
+    explain_concept,
     humanize_text,
-    quiz_from_pdf,
     summarize_pdf,
     summarize_youtube,
 )
@@ -89,25 +88,15 @@ def handle_youtube():
     return jsonify(summary=summary, source=url)
 
 
-@app.post("/quiz")
+@app.post("/explain")
 @limiter.limit("5 per minute")
-def handle_quiz():
-    language = request.form.get("language", "").strip() or "English"
-
-    file = request.files.get("file")
-    if file and file.filename:
-        try:
-            path = _save_upload(file, ALLOWED_PDF)
-        except ValueError as e:
-            return jsonify(error=str(e)), 400
-        result = quiz_from_pdf(path, language=language)
-        return jsonify(result=result, source=path.name)
-
+def handle_explain():
     data = request.get_json(silent=True) or request.form
     text = (data.get("text") or "").strip()
+    language = (data.get("language") or "").strip() or "English"
     if not text:
-        return jsonify(error="Paste some notes or choose a PDF first."), 400
-    result = generate_quiz(text, language=language)
+        return jsonify(error="Enter a concept or paste some text first."), 400
+    result = explain_concept(text, language=language)
     return jsonify(result=result)
 
 

@@ -51,19 +51,14 @@ Goals:
 
 Return only the rewritten text — no preface, no explanation, no quotes around it."""
 
-_QUIZ_PROMPT = """You are a study assistant that creates practice quizzes for university students.
+_EXPLAIN_PROMPT = """You explain concepts to students in the simplest possible way.
 
-Given a student's notes or source material, produce a short practice quiz that:
-- Has 5-8 questions covering the most important concepts.
-- Mixes question types: definitions, short-answer, and one or two "explain why/how" questions.
-- Is ordered from easier recall questions to harder application questions.
-- Provides a clear, correct answer for every question.
+Given a concept, term, or confusing passage, produce a SHORT explanation that:
+- Starts with a 2-3 sentence plain-English explanation, assuming no prior knowledge.
+- Follows with one concrete, everyday analogy that makes the idea click.
+- Ends with a single "In short:" sentence.
 
-Format each item exactly like this, with a blank line between items:
-Q1. <question>
-A1. <answer>
-
-Do not invent content that isn't supported by the source. If the material is thin, write fewer questions rather than padding."""
+Keep it brief — a few short paragraphs at most. Avoid jargon; if you must use a technical term, define it in plain words. Do not pad."""
 
 
 def summarize_pdf(path: Path, language: str = "English") -> str:
@@ -80,22 +75,6 @@ def summarize_pdf(path: Path, language: str = "English") -> str:
         return "No extractable text was found in the PDF — it may be a scanned image. Try an OCR step before summarizing."
 
     return _summarize_text(text, kind="pdf", language=language)
-
-
-def quiz_from_pdf(path: Path, language: str = "English") -> str:
-    try:
-        text = _extract_pdf_text(path)
-    except ValueError as e:
-        return str(e)
-    except PdfReadError as e:
-        return f"Could not read PDF: {e}"
-    except FileNotFoundError:
-        return "PDF file was not found on disk."
-
-    if not text.strip():
-        return "No extractable text was found in the PDF — it may be a scanned image. Try an OCR step first."
-
-    return generate_quiz(text, language=language)
 
 
 def summarize_youtube(url: str, language: str = "English") -> str:
@@ -192,15 +171,12 @@ def humanize_text(text: str) -> str:
     return "\n".join(block.text for block in response.content if block.type == "text").strip()
 
 
-def generate_quiz(text: str, language: str = "English") -> str:
+def explain_concept(text: str, language: str = "English") -> str:
     if not text.strip():
-        return "No text was provided to make a quiz from."
+        return "No concept was provided to explain."
 
     text = text[:_MAX_INPUT_CHARS]
-    user_prompt = (
-        f"Write the quiz in {language}. Both questions and answers must be in {language}.\n\n"
-        f"Source material:\n{text}"
-    )
+    user_prompt = f"Explain the following in {language}, in simple terms:\n\n{text}"
 
     try:
         api_key = os.environ.get("OPENROUTER_API_KEY")
@@ -213,7 +189,7 @@ def generate_quiz(text: str, language: str = "English") -> str:
             system=[
                 {
                     "type": "text",
-                    "text": _QUIZ_PROMPT,
+                    "text": _EXPLAIN_PROMPT,
                     "cache_control": {"type": "ephemeral"},
                 }
             ],

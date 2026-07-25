@@ -61,11 +61,10 @@
         </section>
 
         <section class="card">
-            <h2>2. Generate a practice quiz</h2>
-            <form id="quiz-form" class="upload-form">
-                <textarea name="text" rows="4" placeholder="Paste your notes here — or upload a PDF below..."></textarea>
-                <input type="file" name="file" accept="application/pdf">
-                <button type="submit">Generate quiz</button>
+            <h2>2. Explain a concept simply</h2>
+            <form id="explain-form" class="upload-form">
+                <textarea name="text" rows="3" placeholder="Enter a concept or paste a confusing passage — e.g. 'eigenvectors'..." required></textarea>
+                <button type="submit">Explain simply</button>
             </form>
         </section>
 
@@ -124,22 +123,23 @@
             postForm("/summarize/pdf", fd);
         });
 
-        document.getElementById("quiz-form").addEventListener("submit", async (e) => {
+        document.getElementById("explain-form").addEventListener("submit", async (e) => {
             e.preventDefault();
-            const fd = new FormData(e.target);
-            fd.append("language", languageInput.value);
-            const text = (fd.get("text") || "").trim();
-            const file = fd.get("file");
-            if (!text && (!file || !file.name)) {
-                setStatus("Paste some notes or choose a PDF first.", true);
+            const text = e.target.elements["text"].value.trim();
+            if (!text) {
+                setStatus("Enter a concept or paste some text first.", true);
                 return;
             }
             setStatus("Working… this can take 20–40 seconds on the free model.");
             output.textContent = "";
             try {
-                const res = await fetch("/quiz", { method: "POST", body: fd });
+                const res = await fetch("/explain", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text, language: languageInput.value }),
+                });
                 const data = await readResult(res);
-                setStatus(data.source ? `Done · source: ${data.source}` : "Done");
+                setStatus("Done");
                 output.textContent = data.result;
             } catch (err) {
                 setStatus(err.message, true);
