@@ -24,7 +24,7 @@ from youtube_transcript_api._errors import (
 load_dotenv()
 
 _MODEL = "openai/gpt-oss-20b:free"
-_MAX_TOKENS = 8192
+_MAX_TOKENS = 3000
 # Cap how much source text we send to the model (~10k tokens) so very large
 # PDFs don't time out or overflow the model's context window.
 _MAX_INPUT_CHARS = 40000
