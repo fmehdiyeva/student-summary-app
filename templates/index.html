@@ -61,10 +61,10 @@
         </section>
 
         <section class="card">
-            <h2>2. Paste a YouTube link</h2>
-            <form id="youtube-form" class="upload-form">
-                <input type="url" name="url" placeholder="https://www.youtube.com/watch?v=..." required>
-                <button type="submit">Summarize video link</button>
+            <h2>2. Generate a practice quiz</h2>
+            <form id="quiz-form" class="upload-form">
+                <textarea name="text" rows="5" placeholder="Paste your notes or lecture text to generate practice questions..." required></textarea>
+                <button type="submit">Generate quiz</button>
             </form>
         </section>
 
@@ -114,11 +114,24 @@
             postForm("/summarize/pdf", fd);
         });
 
-        document.getElementById("youtube-form").addEventListener("submit", (e) => {
+        document.getElementById("quiz-form").addEventListener("submit", async (e) => {
             e.preventDefault();
-            const fd = new FormData(e.target);
-            fd.append("language", languageInput.value);
-            postForm("/summarize/youtube", fd);
+            const text = e.target.elements["text"].value;
+            setStatus("Working...");
+            output.textContent = "";
+            try {
+                const res = await fetch("/quiz", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text, language: languageInput.value }),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || "Request failed");
+                setStatus("Done");
+                output.textContent = data.result;
+            } catch (err) {
+                setStatus(err.message, true);
+            }
         });
 
         document.getElementById("humanize-form").addEventListener("submit", async (e) => {

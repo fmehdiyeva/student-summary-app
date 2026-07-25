@@ -13,10 +13,13 @@ text so it reads more naturally.
 ## Features
 
 - **PDF summaries** — extracts text with `pypdf` and summarizes it.
-- **YouTube summaries** — pulls the transcript via `youtube-transcript-api`.
+- **Practice quiz generator** — turns notes into practice questions with answers.
 - **Summaries in any language** — pick the output language per request.
 - **Text humanizer** — rewrites stiff AI text into natural prose.
 - **Rate limiting** — `flask-limiter` caps requests to protect the API quota.
+- **YouTube summaries** — pulls the transcript via `youtube-transcript-api`
+  (works locally; YouTube blocks cloud-server IPs, so it is disabled in the
+  hosted demo).
 
 ## Tech stack
 

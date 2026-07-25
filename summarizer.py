@@ -48,6 +48,20 @@ Goals:
 
 Return only the rewritten text — no preface, no explanation, no quotes around it."""
 
+_QUIZ_PROMPT = """You are a study assistant that creates practice quizzes for university students.
+
+Given a student's notes or source material, produce a short practice quiz that:
+- Has 5-8 questions covering the most important concepts.
+- Mixes question types: definitions, short-answer, and one or two "explain why/how" questions.
+- Is ordered from easier recall questions to harder application questions.
+- Provides a clear, correct answer for every question.
+
+Format each item exactly like this, with a blank line between items:
+Q1. <question>
+A1. <answer>
+
+Do not invent content that isn't supported by the source. If the material is thin, write fewer questions rather than padding."""
+
 
 def summarize_pdf(path: Path, language: str = "English") -> str:
     try:
@@ -153,6 +167,40 @@ def humanize_text(text: str) -> str:
         )
     except anthropic.AuthenticationError:
         return "OPENROUTER_API_KEY is invalid — check your .env file."
+    except anthropic.APIError as e:
+        return f"API error: {e.message}"
+
+    return "\n".join(block.text for block in response.content if block.type == "text").strip()
+
+
+def generate_quiz(text: str, language: str = "English") -> str:
+    if not text.strip():
+        return "No text was provided to make a quiz from."
+
+    user_prompt = (
+        f"Write the quiz in {language}. Both questions and answers must be in {language}.\n\n"
+        f"Source material:\n{text}"
+    )
+
+    try:
+        api_key = os.environ.get("OPENROUTER_API_KEY")
+        if not api_key:
+            return "OPENROUTER_API_KEY is not set — add it to your .env file and restart the app."
+        client = anthropic.Anthropic(base_url="https://openrouter.ai/api", api_key=api_key)
+        response = client.messages.create(
+            model=_MODEL,
+            max_tokens=_MAX_TOKENS,
+            system=[
+                {
+                    "type": "text",
+                    "text": _QUIZ_PROMPT,
+                    "cache_control": {"type": "ephemeral"},
+                }
+            ],
+            messages=[{"role": "user", "content": user_prompt}],
+        )
+    except anthropic.AuthenticationError:
+        return "OPENROUTER_API_KEY is missing or invalid — set it in your environment and try again."
     except anthropic.APIError as e:
         return f"API error: {e.message}"
 

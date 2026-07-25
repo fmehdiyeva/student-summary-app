@@ -7,7 +7,7 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from werkzeug.utils import secure_filename
 
-from summarizer import humanize_text, summarize_pdf, summarize_youtube
+from summarizer import generate_quiz, humanize_text, summarize_pdf, summarize_youtube
 
 UPLOAD_DIR = Path(__file__).parent / "uploads"
 UPLOAD_DIR.mkdir(exist_ok=True)
@@ -81,6 +81,18 @@ def handle_youtube():
         return jsonify(error="No URL provided"), 400
     summary = summarize_youtube(url, language=language)
     return jsonify(summary=summary, source=url)
+
+
+@app.post("/quiz")
+@limiter.limit("5 per minute")
+def handle_quiz():
+    data = request.get_json(silent=True) or request.form
+    text = (data.get("text") or "").strip()
+    language = (data.get("language") or "").strip() or "English"
+    if not text:
+        return jsonify(error="No text provided"), 400
+    result = generate_quiz(text, language=language)
+    return jsonify(result=result)
 
 
 @app.post("/humanize")
