@@ -79,6 +79,22 @@ def summarize_pdf(path: Path, language: str = "English") -> str:
     return _summarize_text(text, kind="pdf", language=language)
 
 
+def quiz_from_pdf(path: Path, language: str = "English") -> str:
+    try:
+        text = _extract_pdf_text(path)
+    except ValueError as e:
+        return str(e)
+    except PdfReadError as e:
+        return f"Could not read PDF: {e}"
+    except FileNotFoundError:
+        return "PDF file was not found on disk."
+
+    if not text.strip():
+        return "No extractable text was found in the PDF — it may be a scanned image. Try an OCR step first."
+
+    return generate_quiz(text, language=language)
+
+
 def summarize_youtube(url: str, language: str = "English") -> str:
     try:
         video_id = _extract_youtube_id(url)

@@ -63,7 +63,8 @@
         <section class="card">
             <h2>2. Generate a practice quiz</h2>
             <form id="quiz-form" class="upload-form">
-                <textarea name="text" rows="5" placeholder="Paste your notes or lecture text to generate practice questions..." required></textarea>
+                <textarea name="text" rows="4" placeholder="Paste your notes here — or upload a PDF below..."></textarea>
+                <input type="file" name="file" accept="application/pdf">
                 <button type="submit">Generate quiz</button>
             </form>
         </section>
@@ -116,18 +117,21 @@
 
         document.getElementById("quiz-form").addEventListener("submit", async (e) => {
             e.preventDefault();
-            const text = e.target.elements["text"].value;
+            const fd = new FormData(e.target);
+            fd.append("language", languageInput.value);
+            const text = (fd.get("text") || "").trim();
+            const file = fd.get("file");
+            if (!text && (!file || !file.name)) {
+                setStatus("Paste some notes or choose a PDF first.", true);
+                return;
+            }
             setStatus("Working...");
             output.textContent = "";
             try {
-                const res = await fetch("/quiz", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ text, language: languageInput.value }),
-                });
+                const res = await fetch("/quiz", { method: "POST", body: fd });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error || "Request failed");
-                setStatus("Done");
+                setStatus(data.source ? `Done · source: ${data.source}` : "Done");
                 output.textContent = data.result;
             } catch (err) {
                 setStatus(err.message, true);
