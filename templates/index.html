@@ -94,13 +94,22 @@
             status.className = "status" + (isError ? " error" : "");
         }
 
+        async function readResult(res) {
+            const contentType = res.headers.get("content-type") || "";
+            if (!contentType.includes("application/json")) {
+                throw new Error("The server took too long or hit an error — try a smaller file or shorter text.");
+            }
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || "Request failed");
+            return data;
+        }
+
         async function postForm(url, formData) {
             setStatus("Working...");
             output.textContent = "";
             try {
                 const res = await fetch(url, { method: "POST", body: formData });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || "Request failed");
+                const data = await readResult(res);
                 setStatus(`Done · source: ${data.source}`);
                 output.textContent = data.summary;
             } catch (e) {
@@ -129,8 +138,7 @@
             output.textContent = "";
             try {
                 const res = await fetch("/quiz", { method: "POST", body: fd });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || "Request failed");
+                const data = await readResult(res);
                 setStatus(data.source ? `Done · source: ${data.source}` : "Done");
                 output.textContent = data.result;
             } catch (err) {
@@ -149,8 +157,7 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ text }),
                 });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || "Request failed");
+                const data = await readResult(res);
                 setStatus("Done");
                 output.textContent = data.result;
             } catch (err) {

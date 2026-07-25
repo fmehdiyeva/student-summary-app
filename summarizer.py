@@ -25,6 +25,9 @@ load_dotenv()
 
 _MODEL = "openai/gpt-oss-20b:free"
 _MAX_TOKENS = 8192
+# Cap how much source text we send to the model (~10k tokens) so very large
+# PDFs don't time out or overflow the model's context window.
+_MAX_INPUT_CHARS = 40000
 
 _SYSTEM_PROMPT = """You are a study assistant that writes clear, well-structured summaries for university students.
 
@@ -193,6 +196,7 @@ def generate_quiz(text: str, language: str = "English") -> str:
     if not text.strip():
         return "No text was provided to make a quiz from."
 
+    text = text[:_MAX_INPUT_CHARS]
     user_prompt = (
         f"Write the quiz in {language}. Both questions and answers must be in {language}.\n\n"
         f"Source material:\n{text}"
@@ -227,6 +231,7 @@ def _summarize_text(text: str, kind: str, language: str = "English") -> str:
     if not text.strip():
         return "No content was found to summarize."
 
+    text = text[:_MAX_INPUT_CHARS]
     user_prompt = (
         f"Source type: {kind}\n"
         f"Write the summary in {language}. All sections (overview, key concepts, study questions) must be in {language}.\n\n"
