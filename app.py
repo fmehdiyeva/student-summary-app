@@ -9,6 +9,7 @@ from werkzeug.utils import secure_filename
 
 from summarizer import (
     explain_concept,
+    explain_from_pdf,
     humanize_text,
     summarize_pdf,
     summarize_youtube,
@@ -91,11 +92,21 @@ def handle_youtube():
 @app.post("/explain")
 @limiter.limit("5 per minute")
 def handle_explain():
+    language = request.form.get("language", "").strip() or "English"
+
+    file = request.files.get("file")
+    if file and file.filename:
+        try:
+            path = _save_upload(file, ALLOWED_PDF)
+        except ValueError as e:
+            return jsonify(error=str(e)), 400
+        result = explain_from_pdf(path, language=language)
+        return jsonify(result=result, source=path.name)
+
     data = request.get_json(silent=True) or request.form
     text = (data.get("text") or "").strip()
-    language = (data.get("language") or "").strip() or "English"
     if not text:
-        return jsonify(error="Enter a concept or paste some text first."), 400
+        return jsonify(error="Enter a concept, paste text, or choose a PDF first."), 400
     result = explain_concept(text, language=language)
     return jsonify(result=result)
 

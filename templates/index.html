@@ -63,7 +63,8 @@
         <section class="card">
             <h2>2. Explain a concept simply</h2>
             <form id="explain-form" class="upload-form">
-                <textarea name="text" rows="3" placeholder="Enter a concept or paste a confusing passage — e.g. 'eigenvectors'..." required></textarea>
+                <textarea name="text" rows="3" placeholder="Enter a concept or paste a passage — e.g. 'eigenvectors' — or upload a PDF below..."></textarea>
+                <input type="file" name="file" accept="application/pdf">
                 <button type="submit">Explain simply</button>
             </form>
         </section>
@@ -125,21 +126,20 @@
 
         document.getElementById("explain-form").addEventListener("submit", async (e) => {
             e.preventDefault();
-            const text = e.target.elements["text"].value.trim();
-            if (!text) {
-                setStatus("Enter a concept or paste some text first.", true);
+            const fd = new FormData(e.target);
+            fd.append("language", languageInput.value);
+            const text = (fd.get("text") || "").trim();
+            const file = fd.get("file");
+            if (!text && (!file || !file.name)) {
+                setStatus("Enter a concept, paste text, or choose a PDF first.", true);
                 return;
             }
             setStatus("Working… this can take 20–40 seconds on the free model.");
             output.textContent = "";
             try {
-                const res = await fetch("/explain", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ text, language: languageInput.value }),
-                });
+                const res = await fetch("/explain", { method: "POST", body: fd });
                 const data = await readResult(res);
-                setStatus("Done");
+                setStatus(data.source ? `Done · source: ${data.source}` : "Done");
                 output.textContent = data.result;
             } catch (err) {
                 setStatus(err.message, true);
