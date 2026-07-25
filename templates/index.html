@@ -105,7 +105,7 @@
         }
 
         async function postForm(url, formData) {
-            setStatus("Working...");
+            setStatus("Working… this can take 20–40 seconds on the free model.");
             output.textContent = "";
             try {
                 const res = await fetch(url, { method: "POST", body: formData });
@@ -134,7 +134,7 @@
                 setStatus("Paste some notes or choose a PDF first.", true);
                 return;
             }
-            setStatus("Working...");
+            setStatus("Working… this can take 20–40 seconds on the free model.");
             output.textContent = "";
             try {
                 const res = await fetch("/quiz", { method: "POST", body: fd });
@@ -149,7 +149,7 @@
         document.getElementById("humanize-form").addEventListener("submit", async (e) => {
             e.preventDefault();
             const text = e.target.elements["text"].value;
-            setStatus("Working...");
+            setStatus("Working… this can take 20–40 seconds on the free model.");
             output.textContent = "";
             try {
                 const res = await fetch("/humanize", {
