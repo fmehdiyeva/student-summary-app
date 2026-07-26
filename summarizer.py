@@ -25,6 +25,9 @@ load_dotenv()
 
 _MODEL = "openai/gpt-oss-20b:free"
 _MAX_TOKENS = 3000
+# Lower randomness → more focused, coherent output and far fewer stray
+# out-of-language characters from the small free model.
+_TEMPERATURE = 0.3
 # Cap how much source text we send to the model (~10k tokens) so very large
 # PDFs don't time out or overflow the model's context window.
 _MAX_INPUT_CHARS = 40000
@@ -170,6 +173,7 @@ def humanize_text(text: str) -> str:
         response = client.messages.create(
             model=_MODEL,
             max_tokens=_MAX_TOKENS,
+            temperature=_TEMPERATURE,
             system=[
                 {
                     "type": "text",
@@ -202,6 +206,7 @@ def explain_concept(text: str, language: str = "English") -> str:
         response = client.messages.create(
             model=_MODEL,
             max_tokens=_MAX_TOKENS,
+            temperature=_TEMPERATURE,
             system=[
                 {
                     "type": "text",
@@ -238,6 +243,7 @@ def _summarize_text(text: str, kind: str, language: str = "English") -> str:
         response = client.messages.create(
             model=_MODEL,
             max_tokens=_MAX_TOKENS,
+            temperature=_TEMPERATURE,
             system=[
                 {
                     "type": "text",
